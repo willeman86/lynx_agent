@@ -1,0 +1,6 @@
+speak:
+  description: "Tell LYNX to say something"
+  fields:
+    message:
+      description: "The message LYNX should speak or show"
+      example: "Hello, world!"
