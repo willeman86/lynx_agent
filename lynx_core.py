@@ -1,0 +1,1 @@
+def ask_lynx(prompt): return "Simulated response to: " + prompt
