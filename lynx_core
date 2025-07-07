@@ -1,0 +1,22 @@
+import openai
+import json
+import os
+
+def ask_lynx(prompt: str) -> str:
+    # Load API key from secrets.json (recommended)
+    secrets_path = os.path.join(os.path.dirname(__file__), "secrets.json")
+    with open(secrets_path, "r") as f:
+        secrets = json.load(f)
+
+    openai.api_key = secrets.get("openai_api_key")
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are LYNX, a smart home assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=150
+    )
+
+    return response.choices[0].message["content"].strip()
