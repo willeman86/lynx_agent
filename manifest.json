@@ -1,0 +1,9 @@
+{
+  "domain": "lynx_agent",
+  "name": "Project LYNX Brain",
+  "version": "1.0.0",
+  "documentation": "https://github.com/willeman86/lynx_agent",
+  "requirements": ["openai==1.33.0"],
+  "codeowners": ["@willeman86"],
+  "config_flow": false
+}
