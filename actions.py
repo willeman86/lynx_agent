@@ -1,22 +1,45 @@
-import logging
+import voluptuous as vol
+from homeassistant.core import HomeAssistant, SupportsResponse
+from homeassistant.helpers.typing import ConfigType
+from homeassistant.components.homeassistant.exposed_entities import async_should_expose
+
 from .lynx_core import ask_lynx
 
-_LOGGER = logging.getLogger(__name__)
 DOMAIN = "lynx_agent"
 
-async def async_setup(hass, config):
-    async def lynx_action_handler(call):
-        prompt = call.data.get("prompt", "Who are you?")
-        _LOGGER.debug(f"[LYNX] Received prompt: {prompt}")
-        result = await hass.async_add_executor_job(ask_lynx, prompt)
-        _LOGGER.info(f"[LYNX] Response: {result}")
-        return {"response": result}
+# Action schema
+ACTION_SCHEMA = vol.Schema({
+    vol.Required("prompt"): str
+})
 
-    hass.http.register_action(
-        domain=DOMAIN,
-        name="ask",
-        handler=lynx_action_handler,
-        schema={"prompt": str},
-    )
+# This tells Home Assistant what actions we expose
+async def async_get_actions(hass: HomeAssistant) -> dict:
+    return {
+        "ask": {
+            "name": "Ask LYNX Agent",
+            "description": "Send a prompt to LYNX and get a reply",
+            "fields": {
+                "prompt": {
+                    "name": "Prompt",
+                    "description": "The question or command to ask the LYNX AI",
+                    "required": True,
+                    "example": "What’s the weather?",
+                    "selector": {"text": {}},
+                }
+            },
+            "supports_response": SupportsResponse.ONLY
+        }
+    }
 
+# Action execution
+async def async_call_action(hass: HomeAssistant, action: str, data: dict) -> dict:
+    if action == "ask":
+        prompt = data.get("prompt", "Who are you?")
+        response = await hass.async_add_executor_job(ask_lynx, prompt, hass)
+        return {"response": response}
+    raise ValueError(f"Unknown action: {action}")
+
+# Register actions
+async def async_setup_actions(hass: HomeAssistant, config: ConfigType) -> bool:
+    hass.data.setdefault(DOMAIN, {})
     return True
